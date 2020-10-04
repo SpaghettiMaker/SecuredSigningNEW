@@ -149,8 +149,8 @@ namespace DotNetAppSqlDb.Controllers
                 return HttpNotFound();
             }
 
-            string filePath = HttpRuntime.AppDomainAppPath + "/NewEmployeeDetails.pdf";
-            string filePathFilled = HttpRuntime.AppDomainAppPath + "/NewEmployeeDetailsFilled.pdf";
+            string filePath = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetails.pdf";
+            string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/"+ id.ToString() +".pdf";
 
             PdfDocument pdf = new PdfDocument(new PdfReader(filePath), new PdfWriter(filePathFilled));
             PdfAcroForm form = PdfAcroForm.GetAcroForm(pdf, true);
@@ -162,9 +162,14 @@ namespace DotNetAppSqlDb.Controllers
             form.GetField("First Name").SetValue(todo.FirstName);
             form.GetField("Last Name").SetValue(todo.LastName);
             form.GetField("Full Address").SetValue(todo.FullAddress);
-            PdfTextFormField mailingAddress = PdfFormField.CreateText(pdf, new Rectangle(227, 607, 310, 30), "mailingAddress", todo.MailingAddress, fontHELVETICA, 18);
-            form.AddField(mailingAddress);
-            form.GetField("As Above").SetCheckType(PdfFormField.TYPE_CHECK).SetValue(AsAboveAddressVaule);
+            if (todo.MailingAddress != null && AsAboveAddressVaule.Length <= 0) 
+            {
+                PdfTextFormField mailingAddress = PdfFormField.CreateText(pdf, new Rectangle(227, 607, 310, 30), "mailingAddress", todo.MailingAddress, fontHELVETICA, 18);
+                form.AddField(mailingAddress);
+            } else {
+                form.GetField("As Above").SetCheckType(PdfFormField.TYPE_CHECK).SetValue(AsAboveAddressVaule);
+            }
+
             form.GetField("Email Address").SetValue(todo.EmailAddress).SetJustification(PdfFormField.ALIGN_LEFT);
             PdfTextFormField phoneNumber = PdfFormField.CreateText(pdf, new Rectangle(145, 538, 392, 30), "phoneNumber", "0" + todo.PhoneNumber.ToString(), fontHELVETICA, 18);
             form.AddField(phoneNumber);
