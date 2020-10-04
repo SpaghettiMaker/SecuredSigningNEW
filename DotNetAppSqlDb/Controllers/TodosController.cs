@@ -150,8 +150,8 @@ namespace DotNetAppSqlDb.Controllers
             }
 
             string filePath = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetails.pdf";
-            string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/"+ id.ToString() +".pdf";
-
+            //string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/"+ id.ToString() +".pdf";
+            string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetailsFilled.pdf";
             PdfDocument pdf = new PdfDocument(new PdfReader(filePath), new PdfWriter(filePathFilled));
             PdfAcroForm form = PdfAcroForm.GetAcroForm(pdf, true);
 
