@@ -20,6 +20,8 @@ using iText.Kernel.Geom;
 using iText.IO.Image;
 using iText.Layout;
 using iText.Layout.Element;
+using System.Web.Hosting;
+using System.Reflection;
 
 namespace DotNetAppSqlDb.Controllers
 {
@@ -149,9 +151,11 @@ namespace DotNetAppSqlDb.Controllers
                 return HttpNotFound();
             }
 
-            string filePath = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetails.pdf";
-            //string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/"+ id.ToString() +".pdf";
-            string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetailsFilled.pdf";
+            //string filePath = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetails.pdf";
+            //string filePathFilled = HttpRuntime.AppDomainAppPath + "/PDF/NewEmployeeDetailsFilled.pdf";
+            string filePath = MapPath("~/PDF/NewEmployeeDetails.pdf");
+            string filePathFilled = MapPath("~/PDF/NewEmployeeDetailsFilled.pdf");
+
             PdfDocument pdf = new PdfDocument(new PdfReader(filePath), new PdfWriter(filePathFilled));
             PdfAcroForm form = PdfAcroForm.GetAcroForm(pdf, true);
 
@@ -194,6 +198,17 @@ namespace DotNetAppSqlDb.Controllers
             pdf.Close();
 
             return File(filePathFilled, "application/pdf"); ;
+        }
+        private string MapPath(string seedFile)
+        {
+            if (HttpContext.CurrentHandler != null)
+                return HostingEnvironment.MapPath(seedFile);
+
+            var absolutePath = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath; //was AbsolutePath but didn't work with spaces according to comments
+            var directoryName = System.IO.Path.GetDirectoryName(absolutePath);
+            var path = System.IO.Path.Combine(directoryName, ".." + seedFile.TrimStart('~').Replace('/', '\\'));
+
+            return path;
         }
         protected override void Dispose(bool disposing)
         {
