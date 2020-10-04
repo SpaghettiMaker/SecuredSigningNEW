@@ -26,6 +26,7 @@ namespace DotNetAppSqlDb.Models
         [Required]
         [Display(Name = "Phone Number")]
         [DataType(DataType.PhoneNumber)]
+        [RegularExpression(@"\d{9,10}", ErrorMessage = "Please enter a valid phone number")]
         public long PhoneNumber { get; set; }
         [Required]
         [Display(Name = "Citizen Status")]
@@ -50,6 +51,7 @@ namespace DotNetAppSqlDb.Models
         [Required]
         [Display(Name = "Emergency Contact Phone Number")]
         [DataType(DataType.PhoneNumber)]
+        [RegularExpression(@"\d{9,10}", ErrorMessage = "Please enter a valid phone number")]
         public long EmergencyContactPhoneNumber { get; set; }
         [UIHint("SignaturePad")]
         public byte[] EmployeeSignature { get; set; }

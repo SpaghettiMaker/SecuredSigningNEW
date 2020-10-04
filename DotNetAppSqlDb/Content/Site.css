@@ -22,10 +22,13 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/* Change ScaleAbsolute(int, int) for same aspect ratio in TodosController for same scaling
+    Image image = new Image(imageData).ScaleAbsolute(int, int).SetFixedPosition(int, int, int); */
 .signature-pad > canvas {
     display: block;
     width: 400px;
-    height: 250px;
+    height: 100px;
     margin-bottom: 5px;
     outline: grey 3px solid;
 }

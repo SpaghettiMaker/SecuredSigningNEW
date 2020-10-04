@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -6,7 +7,19 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using DotNetAppSqlDb.Models;using System.Diagnostics;
+using DotNetAppSqlDb.Models;
+using System.Diagnostics;
+
+using iText;
+using iText.Kernel.Pdf;
+using iText.Forms;
+using iText.Forms.Fields;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using iText.Kernel.Geom;
+using iText.IO.Image;
+using iText.Layout;
+using iText.Layout.Element;
 
 namespace DotNetAppSqlDb.Controllers
 {
@@ -122,7 +135,61 @@ namespace DotNetAppSqlDb.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+        // GET: Todos/Delete/5
+        public ActionResult GetPDF(int? id)
+        {
+            Trace.WriteLine("GET /Todos/GetPDF/" + id);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Todo todo = db.Todoes.Find(id);
+            if (todo == null)
+            {
+                return HttpNotFound();
+            }
 
+            string filePath = HttpRuntime.AppDomainAppPath + "/NewEmployeeDetails.pdf";
+            string filePathFilled = HttpRuntime.AppDomainAppPath + "/NewEmployeeDetailsFilled.pdf";
+
+            PdfDocument pdf = new PdfDocument(new PdfReader(filePath), new PdfWriter(filePathFilled));
+            PdfAcroForm form = PdfAcroForm.GetAcroForm(pdf, true);
+
+            PdfFont fontHELVETICA = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+
+            string AsAboveAddressVaule = todo.AsAboveAddress ? "Yes" : ""; // empty string is false
+
+            form.GetField("First Name").SetValue(todo.FirstName);
+            form.GetField("Last Name").SetValue(todo.LastName);
+            form.GetField("Full Address").SetValue(todo.FullAddress);
+            PdfTextFormField mailingAddress = PdfFormField.CreateText(pdf, new Rectangle(227, 607, 310, 30), "mailingAddress", todo.MailingAddress, fontHELVETICA, 18);
+            form.AddField(mailingAddress);
+            form.GetField("As Above").SetCheckType(PdfFormField.TYPE_CHECK).SetValue(AsAboveAddressVaule);
+            form.GetField("Email Address").SetValue(todo.EmailAddress).SetJustification(PdfFormField.ALIGN_LEFT);
+            PdfTextFormField phoneNumber = PdfFormField.CreateText(pdf, new Rectangle(145, 538, 392, 30), "phoneNumber", "0" + todo.PhoneNumber.ToString(), fontHELVETICA, 18);
+            form.AddField(phoneNumber);
+            form.GetField("Citizenship Statas").SetValue(todo.CitizenStatus).SetJustification(PdfFormField.ALIGN_LEFT);
+            form.GetField("Employment Start Date").SetValue(todo.EmploymentStartDate.ToString()).SetJustification(PdfFormField.ALIGN_LEFT);
+            form.GetField("Employment Type").SetValue(todo.EmploymentType).SetJustification(PdfFormField.ALIGN_LEFT);
+            form.GetField("Position Title").SetValue(todo.PositionTitle).SetJustification(PdfFormField.ALIGN_LEFT);
+            form.GetField("Name").SetValue(todo.EmergencyContactName);
+            form.GetField("Relationship").SetValue(todo.EmergencyContactRelationship);
+            PdfTextFormField emergencyContactPhoneNumber = PdfFormField.CreateText(pdf, new Rectangle(145, 275, 392, 30), "emergencyPhoneNumber", "0" + todo.EmergencyContactPhoneNumber.ToString(), fontHELVETICA, 18);
+            form.AddField(emergencyContactPhoneNumber);
+
+            if (todo.EmployeeSignature != null) 
+            {
+                ImageData imageData = ImageDataFactory.CreatePng(todo.EmployeeSignature);
+                Image image = new Image(imageData).ScaleAbsolute(200, 50).SetFixedPosition(1, 190, 180);
+                Document document = new Document(pdf);
+                document.Add(image);
+            }
+
+            form.FlattenFields();
+            pdf.Close();
+
+            return File(filePathFilled, "application/pdf"); ;
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
